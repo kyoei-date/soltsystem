@@ -110,7 +110,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 .party-left{padding:14px 18px;border-right:1.5px solid #1a3a6b}
 .party-right{padding:14px 18px;background:#f0f4fc;display:flex;flex-direction:column;gap:0}
 .party-label{font-size:9px;color:#5a6a82;letter-spacing:.05em;margin-bottom:4px;font-weight:500;text-transform:uppercase}
-.customer-name{font-size:16pt;font-weight:500;border-bottom:1.5px solid #1a3a6b;padding-bottom:6px;margin-bottom:8px}
+.customer-name{font-size:15pt;font-weight:500;border-bottom:1.5px solid #1a3a6b;padding-bottom:6px;margin-bottom:8px;word-break:break-all;white-space:pre-wrap;line-height:1.5}
 .greeting{font-size:10px;color:#444;line-height:1.9}
 .company-name{font-size:13pt;font-weight:500;color:#1a3a6b}
 .company-sub{font-size:9px;color:#555;line-height:2;margin-top:3px;margin-bottom:10px}
@@ -1090,7 +1090,7 @@ function spCloseMore(){
 // ─────────────────────────────────────────────────────────
 
 function newEst(type){
-  S.editData={type,no:genNo(type),date:today(),customer:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'（船腹）',kaisouFare2:'',kaisouFareLabel2:'（船腹）',kaisouConditions:''};
+  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'（船腹）',kaisouFare2:'',kaisouFareLabel2:'（船腹）',kaisouConditions:''};
   S.selIdx=null;
   if(isMobile())spSw('new');else sw('new');
 }
@@ -1451,7 +1451,7 @@ function renderListSP(){
         <span class="sp-est-card-no">No. ${e.no||'―'}</span>
         ${typeBadge(e.type)}
       </div>
-      <div class="sp-est-card-customer">${e.customer||'（宛先未入力）'}</div>
+      <div class="sp-est-card-customer">${(e.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
       <div class="sp-est-card-meta">
         <span><i class="ti ti-calendar" style="font-size:11px"></i> ${dateStr}</span>
         <span style="font-weight:600;color:#1a3a6b">${amtStr}</span>
@@ -1519,7 +1519,7 @@ function renderList(){
     return`<div class="est-card" onclick="viewEst(${i})" style="cursor:pointer">
       <div style="display:flex;flex-direction:column;gap:4px">
         <div style="font-size:11px;color:#8a9ab5;font-weight:500;font-family:monospace">No. ${e.no}</div>
-        <div style="font-size:14px;font-weight:600;color:#1a2a44">${e.customer||'（宛先未入力）'}</div>
+        <div style="font-size:14px;font-weight:600;color:#1a2a44">${(e.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
           ${typeBadge(e.type)}
           <span style="font-size:11px;color:#5a6a82;background:#f0f4fa;padding:2px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-calendar" style="font-size:10px"></i>${dateStr}</span>
@@ -1581,7 +1581,7 @@ function renderListInPlace(){
     return`<div class="est-card" onclick="viewEst(${i})" style="cursor:pointer">
       <div style="display:flex;flex-direction:column;gap:4px">
         <div style="font-size:11px;color:#8a9ab5;font-weight:500;font-family:monospace">No. ${e.no}</div>
-        <div style="font-size:14px;font-weight:600;color:#1a2a44">${e.customer||'（宛先未入力）'}</div>
+        <div style="font-size:14px;font-weight:600;color:#1a2a44">${(e.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
           ${typeBadge(e.type)}
           <span style="font-size:11px;color:#5a6a82;background:#f0f4fa;padding:2px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-calendar" style="font-size:10px"></i>${dateStr}</span>
@@ -1707,7 +1707,7 @@ function renderForm(){
     <div class="card-body">
       <div class="form-grid">
         <div class="form-group"><label>作成日</label><input type="date" value="${d.date}" onchange="updField('date',this.value)"></div>
-        <div class="form-group"><label>宛先（会社名）</label><input type="text" value="${d.customer}" onchange="updField('customer',this.value)" placeholder="例：中四国ソルト株式会社"></div>
+        <div class="form-group full"><label>宛先（会社名）</label><textarea rows="2" style="min-height:unset;height:54px;resize:vertical" onchange="updField('customer',this.value)" placeholder="1行目：例：中四国ソルト株式会社&#10;2行目：部署名など（任意）">${d.customer}</textarea></div>
         <div class="form-group full"><label>照会番号・件名</label><input type="text" value="${d.ref}" onchange="updField('ref',this.value)" placeholder="例：〇〇年〇月〇日付貴第〇〇号にて"></div>
       </div>
       <div style="border-top:2px dashed #dce8f5;margin-top:16px;padding-top:14px">
@@ -1786,7 +1786,7 @@ function renderDocTab(docType){
   const addr=e.deliveryAddr||'';
   const list=S.estimates.map((est,i)=>`<div class="est-card${i===idx?' sel':''}" onclick="S.selIdx=${i};render()" style="display:block;margin-bottom:6px;padding:10px 12px">
     <div style="font-size:11px;color:#1a3a6b;font-weight:500">No. ${est.no}</div>
-    <div style="font-size:13px;font-weight:500;margin:2px 0">${est.customer||'（未入力）'}</div>
+    <div style="font-size:13px;font-weight:500;margin:2px 0">${(est.customer||'（未入力）').replace(/\n/g,' ')}</div>
     ${typeBadge(est.type)}
   </div>`).join('');
   const previewHTML=buildPrintDoc(e,name,addr);
@@ -2090,7 +2090,7 @@ function renderHelp(){
   function sec(icon,title,rows){
     return '<div class="card" style="margin-bottom:0">'
       +'<div class="card-head"><i class="ti '+icon+'"></i>'+title+'</div>'
-      +'<div style="font-size:13px;color:#333;line-height:1.9">'+rows+'</div>'
+      +'<div style="font-size:13px;color:#333;line-height:1.9;padding:14px 18px 10px">'+rows+'</div>'
       +'</div>';
   }
   function row(label,desc){
