@@ -326,7 +326,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
   <!-- PC用ナビタブ -->
   <div class="nav-tabs no-print" id="navTabs">
     <div class="tab active" onclick="sw('list')"><i class="ti ti-list-details" style="margin-right:4px"></i>見積一覧</div>
-    <div class="tab" onclick="S.editData=null;S.readOnly=false;S.selIdx=null;sw('new')"><i class="ti ti-plus" style="margin-right:4px"></i>新規作成</div>
+    <div class="tab" onclick="if(confirmLeave()){S.editData=null;S.readOnly=false;S.selIdx=null;sw('new')}"><i class="ti ti-plus" style="margin-right:4px"></i>新規作成</div>
     <div class="tab" onclick="sw('receipt')"><i class="ti ti-receipt" style="margin-right:4px"></i>受領書</div>
     <div class="tab" onclick="sw('delivery')"><i class="ti ti-truck-delivery" style="margin-right:4px"></i>納品書</div>
     <div class="tab" onclick="sw('received')"><i class="ti ti-inbox" style="margin-right:4px"></i>受領見積書</div>
@@ -1021,7 +1021,16 @@ function genNo(t){
   return `${ymd}-${seq}`;
 }
 
+function isUnsaved(){
+  // 新規作成・編集中（読み取り専用でない）かつeditDataがある場合に未保存とみなす
+  return S.tab==='new' && S.editData && !S.readOnly;
+}
+function confirmLeave(){
+  if(!isUnsaved())return true;
+  return confirm('入力中の見積が保存されていません。\nこのまま移動すると入力内容が失われます。\n\n移動しますか？');
+}
 function sw(tab){
+  if(tab!=='new' && !confirmLeave())return;
   S.tab=tab;
   document.querySelectorAll('.tab').forEach((t,i)=>{
     t.classList.toggle('active',['list','new','receipt','delivery','received','admin','settings','help'][i]===tab);
@@ -1050,6 +1059,7 @@ function applyLayout(){
 window.addEventListener('resize',()=>{applyLayout();render();});
 function spSw(tab){
   if(!isMobile()){sw(tab);return;}
+  if(tab!=='new' && !confirmLeave())return;
   S.tab=tab;
   // 下部ナビのアクティブ更新
   SP_NAV_TABS.forEach(t=>{
@@ -1689,7 +1699,7 @@ function renderForm(){
         <div style="font-size:15px;font-weight:500;color:#1a3a6b;font-family:monospace">${d.no}</div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn" onclick="S.editData=null;S.readOnly=false;sw('list')"><i class="ti ti-arrow-left"></i>一覧へ戻る</button>
+        <button class="btn" onclick="if(confirmLeave()){S.editData=null;S.readOnly=false;sw('list')}"><i class="ti ti-arrow-left"></i>一覧へ戻る</button>
         <button class="btn pdf" onclick="printEst()"><i class="ti ti-printer"></i>PDF印刷</button>
         ${isReadOnly
           ?`<button class="btn" onclick="copyEst(S.selIdx)"><i class="ti ti-copy"></i>コピー</button>
