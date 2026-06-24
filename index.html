@@ -1081,7 +1081,7 @@ function spCloseMore(){
 // ─────────────────────────────────────────────────────────
 
 function newEst(type){
-  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'2日航程',kaisouFare2:'',kaisouFareLabel2:'3日航程',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:''};
+  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:''};
   S.selIdx=null;
   if(isMobile())spSw('new');else sw('new');
 }
@@ -1657,22 +1657,22 @@ function renderForm(){
       <div class="form-group"><label>使用船舶</label><input type="text" value="${d.kaisouShip||''}" onchange="updField('kaisouShip',this.value)" placeholder="499型一般貨物船"></div>
       <div class="form-group"><label>航路</label><input type="text" value="${d.kaisouRoute||''}" onchange="updField('kaisouRoute',this.value)" placeholder="水島 / 黒崎"></div>
       <div class="form-group"><label>海上運賃①　航程名</label>
-        <input type="text" value="${d.kaisouFareLabel1||'2日航程'}" onchange="updField('kaisouFareLabel1',this.value)" placeholder="例：2日航程">
+        <input type="text" value="${d.kaisouFareLabel1||''}" onchange="updField('kaisouFareLabel1',this.value)" placeholder="例：2日航程">
       </div>
       <div class="form-group"><label>海上運賃①　金額（円）</label>
-        <input type="number" value="${d.kaisouFare1||''}" onchange="updField('kaisouFare1',this.value)" placeholder="2220000" style="text-align:right">
+        <input type="number" value="${d.kaisouFare1||''}" onchange="updField('kaisouFare1',this.value)" placeholder="例：2,220,000" style="text-align:right">
       </div>
       <div class="form-group"><label>海上運賃②　航程名</label>
-        <input type="text" value="${d.kaisouFareLabel2||'3日航程'}" onchange="updField('kaisouFareLabel2',this.value)" placeholder="例：3日航程">
+        <input type="text" value="${d.kaisouFareLabel2||''}" onchange="updField('kaisouFareLabel2',this.value)" placeholder="例：3日航程">
       </div>
       <div class="form-group"><label>海上運賃②　金額（円）</label>
-        <input type="number" value="${d.kaisouFare2||''}" onchange="updField('kaisouFare2',this.value)" placeholder="3000000" style="text-align:right">
+        <input type="number" value="${d.kaisouFare2||''}" onchange="updField('kaisouFare2',this.value)" placeholder="例：3,000,000" style="text-align:right">
       </div>
       <div class="form-group"><label>海上運賃③　航程名</label>
         <input type="text" value="${d.kaisouFareLabel3||''}" onchange="updField('kaisouFareLabel3',this.value)" placeholder="例：4日航程">
       </div>
       <div class="form-group"><label>海上運賃③　金額（円）</label>
-        <input type="number" value="${d.kaisouFare3||''}" onchange="updField('kaisouFare3',this.value)" placeholder="" style="text-align:right">
+        <input type="number" value="${d.kaisouFare3||''}" onchange="updField('kaisouFare3',this.value)" placeholder="例：3,500,000" style="text-align:right">
       </div>
       <div class="form-group full"><label>付帯条件</label><textarea rows="4" onchange="updField('kaisouConditions',this.value)">${d.kaisouConditions||''}</textarea></div>
     </div></div></div>`;
