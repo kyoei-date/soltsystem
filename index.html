@@ -2084,149 +2084,152 @@ function downloadReceivedPDF(i){
 
 
 function renderHelp(){
-  function sec(icon,title,rows){
+  function sec(icon,title,body){
     return '<div class="card" style="margin-bottom:0">'
       +'<div class="card-head"><i class="ti '+icon+'"></i>'+title+'</div>'
-      +'<div style="font-size:13px;color:#333;line-height:1.9;padding:14px 18px 10px">'+rows+'</div>'
+      +'<div style="font-size:13px;color:#333;line-height:1.9;padding:14px 18px 10px">'+body+'</div>'
       +'</div>';
   }
   function row(label,desc){
     return '<div style="display:flex;gap:0;border-bottom:1px solid #f0f4fa;padding:9px 0;align-items:flex-start">'
-      +'<div style="min-width:160px;font-weight:500;color:#1a3a6b;font-size:12px;padding-top:1px;flex-shrink:0">'+label+'</div>'
+      +'<div style="min-width:150px;font-weight:600;color:#1a3a6b;font-size:12px;padding-top:2px;flex-shrink:0">'+label+'</div>'
       +'<div style="color:#444;font-size:13px;line-height:1.8;flex:1">'+desc+'</div>'
       +'</div>';
   }
   function note(txt){
-    return '<div style="background:#fffbe6;border-left:3px solid #f0a500;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#7a5c00;margin-top:8px;line-height:1.7">'+txt+'</div>';
+    return '<div style="background:#fffbe6;border-left:3px solid #f0a500;padding:9px 13px;border-radius:0 6px 6px 0;font-size:12px;color:#7a5c00;margin-top:10px;line-height:1.8">'+txt+'</div>';
   }
   function info(txt){
-    return '<div style="background:#eaf3ff;border-left:3px solid #1a3a6b;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1a3a6b;margin-top:8px;line-height:1.7">'+txt+'</div>';
+    return '<div style="background:#eaf3ff;border-left:3px solid #1a3a6b;padding:9px 13px;border-radius:0 6px 6px 0;font-size:12px;color:#1a3a6b;margin-top:10px;line-height:1.8">'+txt+'</div>';
+  }
+  function ok(txt){
+    return '<div style="background:#edfaf3;border-left:3px solid #27ae60;padding:9px 13px;border-radius:0 6px 6px 0;font-size:12px;color:#1a5c38;margin-top:10px;line-height:1.8">'+txt+'</div>';
   }
   function btn(txt){
-    return '<span style="display:inline-flex;align-items:center;gap:3px;background:#e8eef7;color:#1a3a6b;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:500">'+txt+'</span>';
+    return '<span style="display:inline-flex;align-items:center;gap:3px;background:#e8eef7;color:#1a3a6b;border-radius:6px;padding:2px 9px;font-size:12px;font-weight:600;border:1px solid #c8d8f0">'+txt+'</span>';
   }
   function badge(txt,cls){
     return '<span class="badge b-'+cls+'" style="font-size:11px;vertical-align:middle">'+txt+'</span>';
   }
-
-  // ── はじめに（クイックスタート）
-  var intro='<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">'
-    +'<div style="font-size:14px;font-weight:500;color:#1a3a6b;margin-bottom:14px;display:flex;align-items:center;gap:6px"><i class="ti ti-rocket" style="font-size:16px"></i>はじめて使う方へ　― 基本の流れ</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">'
-    +step('1','ti-file-plus','見積書を作る','「新規作成」タブを開き、種別を選んで内容を入力。最後に「保存」を押す。')
-    +step('2','ti-list-details','一覧で確認','「見積一覧」タブに保存した見積書が並ぶ。クリックすると内容を確認できる。')
-    +step('3','ti-printer','PDFで出力','見積書カードの「PDF印刷」ボタンを押すと印刷ダイアログが開く。')
-    +step('4','ti-receipt','関連書類も作成','受領書・納品書は同じ見積データから自動生成できる。')
-    +'</div>'
-    +info('💡 データはこのブラウザにのみ保存されます。別のPCや別のブラウザでは表示されませんのでご注意ください。')
-    +'</div>';
-
   function step(num,icon,title,desc){
     return '<div style="background:#f5f8fc;border-radius:8px;padding:14px 12px;display:flex;flex-direction:column;gap:8px">'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<div style="width:24px;height:24px;background:#1a3a6b;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">'+num+'</div>'
+      +'<div style="width:26px;height:26px;background:#1a3a6b;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+num+'</div>'
       +'<i class="ti '+icon+'" style="font-size:18px;color:#1a3a6b"></i>'
-      +'<div style="font-size:12px;font-weight:500;color:#1a3a6b">'+title+'</div>'
+      +'<div style="font-size:12px;font-weight:600;color:#1a3a6b">'+title+'</div>'
       +'</div>'
       +'<div style="font-size:12px;color:#555;line-height:1.7">'+desc+'</div>'
       +'</div>';
   }
 
+  // ── クイックスタート
+  var intro='<div style="background:#fff;border:1px solid #dde4f0;border-radius:10px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+    +'<div style="font-size:14px;font-weight:600;color:#1a3a6b;margin-bottom:14px;display:flex;align-items:center;gap:6px"><i class="ti ti-rocket" style="font-size:17px"></i>基本の流れ（はじめての方はここから）</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px">'
+    +step('1','ti-file-plus','見積書を作る','「新規作成」タブを開き、種別を選んで必要事項を入力。最後に「保存」を押す。')
+    +step('2','ti-list-details','一覧で確認する','「見積一覧」タブに保存した見積書が並ぶ。カードをクリックすると内容を閲覧できる。')
+    +step('3','ti-printer','PDFで印刷する','見積書カードの「PDF印刷」ボタンを押すと印刷ダイアログが開く。')
+    +step('4','ti-receipt','受領書・納品書を出す','同じ見積データから受領書・納品書を自動生成できる。')
+    +'</div>'
+    +info('💡 データはクラウド（Firestore）に保存されます。ログイン済みであれば複数のPCやブラウザから同じデータにアクセスできます。')
+    +'</div>';
+
   // ── ① 見積一覧
   var s1=sec('ti-list-details','① 見積一覧',
-    row('この画面でできること','保存済みの見積書をまとめて確認できます。見積番号・宛先・種別・日付・金額・作成者が一目でわかります。')
-    +row('見積書を開く','カードをクリックすると内容を閲覧できます（閲覧モード）。修正したい場合は右上の「修正する」ボタンを押してください。')
-    +row('絞り込み検索','画面上部の検索ボックスに文字を入力すると、<b>会社名・見積番号・日付・金額・作成者・種別（塩・内販・回漕）</b> をリアルタイムで絞り込みます。「×」で検索をクリアできます。')
-    +row('種別バッジの見方',badge('塩（外販）','shio')+' '+badge('内販','nai')+' '+badge('回漕','kaisou')+'　の3種類があります。回漕は海上運賃①＋②の合計金額を表示します。')
-    +row('作成者バッジ','基本情報の「作成」欄に名前を入力すると、カードにバッジ表示されます。誰が作った見積書か一目でわかります。')
-    +'<div style="border-bottom:1px solid #f0f4fa;padding:9px 0">'
-    +'<div style="font-weight:500;color:#1a3a6b;font-size:12px;margin-bottom:8px">各ボタンの役割</div>'
-    +'<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#444">'
-    +'<div>'+btn('✏ カードをクリック')+'　内容を閲覧します（閲覧モード）。修正は「修正する」ボタンから。</div>'
-    +'<div>'+btn('修正')+'　内容を編集できます。</div>'
-    +'<div>'+btn('📋 コピー')+'　内容をそのまま複製して新しい見積書を作成します。見積番号・日付は自動で更新されます。よく似た見積書を作る際に便利です。</div>'
-    +'<div>'+btn('🖨 PDF印刷')+'　その見積書をPDFで印刷します。</div>'
-    +'<div>'+btn('🗑 削除')+'　確認ダイアログの後に削除します。<b>削除したデータは元に戻せません。</b></div>'
-    +'</div>'
-    +'</div>'
+    row('概要','保存済みの見積書を一覧で確認できます。見積番号・宛先・種別・日付・金額・作成者が一目でわかります。')
+    +row('見積書を開く','カードをクリックすると <b>閲覧モード</b> で内容を確認できます。修正したい場合は右上の '+btn('修正する')+' を押してください。')
+    +row('絞り込み検索','検索ボックスに文字を入力すると <b>会社名・見積番号・日付・金額・作成者・種別</b> をリアルタイムで絞り込みます。'+btn('×')+' で検索をクリアできます。')
+    +row('年度フィルター','検索ボックス横のドロップダウンで表示する <b>年度（4月〜翌3月）</b> を絞り込めます。「全期間」を選ぶとすべての年度が表示されます。')
+    +row('種別バッジ',badge('塩（外販）','shio')+'・'+badge('内販','nai')+'・'+badge('回漕','kaisou')+' の3種類。回漕は海上運賃①②③の合計金額を表示します。')
+    +row('各ボタンの役割',
+      '<div style="display:flex;flex-direction:column;gap:7px;margin-top:4px">'
+      +'<div>'+btn('修正')+'　内容を編集モードで開きます。</div>'
+      +'<div>'+btn('📋 コピー')+'　内容を複製して新しい見積書を作成します。見積番号・日付は自動更新されます。似た内容の見積書を続けて作る際に便利です。</div>'
+      +'<div>'+btn('🖨 PDF印刷')+'　その見積書を印刷します。</div>'
+      +'<div>'+btn('🗑 削除')+'　確認後に削除します。<b>削除したデータは復元できません。</b></div>'
+      +'</div>')
   );
 
   // ── ② 新規作成
   var s2=sec('ti-file-plus','② 新規作成',
-    row('基本の流れ','「新規作成」タブを押すと <b>種別選択画面</b> が表示されます。種別を選ぶと入力フォームが開きます。入力後に「保存」を押すと見積一覧に追加されます。')
+    row('基本の流れ','「新規作成」タブを押すと <b>種別選択画面</b> が表示されます。種別を選ぶと入力フォームが開き、入力後に '+btn('💾 保存')+' を押すと見積一覧に追加されます。')
     +row('種別の選び方',
       badge('塩（外販）','shio')+'　外販向け塩の見積書。受渡期限・納期・発注ロット・受渡条件などを入力します。<br>'
       +badge('内販','nai')+'　内販向け商品の見積書。納期・受渡場所・発注ロット・受渡条件などを入力します。<br>'
-      +badge('回漕','kaisou')+'　海上輸送の見積書。使用船舶・航路・海上運賃①②などを入力します。')
-    +row('見積番号について','種別・年月・連番から <b>自動で生成</b> されます（例：260617-901）。手動では変更できません。')
+      +badge('回漕','kaisou')+'　海上輸送の見積書。使用船舶・航路・海上運賃①②③・付帯条件を入力します。')
+    +row('見積番号','種別・年月・連番から <b>自動で生成</b> されます（例：260617-901）。手動では変更できません。')
     +'<div style="border-bottom:1px solid #f0f4fa;padding:9px 0">'
-    +'<div style="font-weight:500;color:#1a3a6b;font-size:12px;margin-bottom:8px">入力項目の説明</div>'
-    +'<div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:#444;line-height:1.8">'
-    +'<div><b>基本情報</b>　作成日・宛先（会社名）・照会番号。承認・調査・作成の担当者名も入力できます。「作成」欄はPDFと一覧の両方に反映されます。</div>'
-    +'<div><b>条件</b>　種別ごとの取引条件を入力します。各項目は2行まで入力できます。「その他」欄は自由記述です。</div>'
-    +'<div><b>品目明細</b>（塩・内販のみ）　品名・規格・数量・単位・単価を入力すると金額が自動計算されます。「行追加」で複数行入力できます。</div>'
-    +'<div><b>海上輸送詳細</b>（回漕のみ）　使用船舶・航路・海上運賃①②・付帯条件を入力します。運賃の隣に「（船腹）」などの補足メモも書けます。</div>'
-    +'<div><b>備考</b>　PDF下部に印刷される注記欄です。</div>'
+    +'<div style="font-weight:600;color:#1a3a6b;font-size:12px;margin-bottom:10px">入力カードの説明</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#444;line-height:1.8">'
+    +'<div><b>📋 基本情報</b>　作成日・宛先（会社名）・照会番号を入力します。宛先は改行して複数行も入力できます（改行なしの場合は1行で表示）。承認・調査・作成の担当者名も入力でき、「作成」欄はPDFと一覧の両方に反映されます。</div>'
+    +'<div><b>📋 条件</b>　種別ごとの取引条件を入力します。各項目は複数行入力できます。「その他」欄は自由記述です。</div>'
+    +'<div><b>📋 品目明細</b>（塩・内販のみ）　品名・規格・数量・単位・単価を入力すると金額が自動計算されます。'+btn('行追加')+' で複数行入力できます。</div>'
+    +'<div><b>📋 海上輸送詳細</b>（回漕のみ）　使用船舶・航路・海上運賃①②③・付帯条件を入力します。各運賃には航程名（例：2日航程）と金額を自由に入力でき、入力済みの運賃のみPDFに出力されます。</div>'
+    +'<div><b>📋 備考</b>　PDF下部に印刷される注記欄です。</div>'
     +'</div>'
     +'</div>'
-    +row(btn('💾 保存'),'入力内容をブラウザに保存します。保存後は「見積一覧」に反映されます。<b>保存を押さないとデータが消えます。</b>')
+    +row(btn('💾 保存'),'入力内容をクラウドに保存します。<b>保存を押さないとデータが消えます。</b> こまめに保存してください。')
     +row(btn('🖨 PDF印刷'),'編集中の内容を印刷します。保存前でも印刷できます。')
-    +row(btn('一覧へ戻る'),'保存せずに一覧へ戻ります。入力途中の内容は失われますのでご注意ください。')
-    +note('⚠ 「新規作成」タブを押すと、毎回種別選択画面からスタートします。作成途中の場合は必ず先に「保存」してから他のタブへ移動してください。')
+    +row(btn('一覧へ戻る'),'保存せずに一覧へ戻ります。未保存の内容は失われます。')
+    +note('⚠ 「新規作成」タブを押すたびに種別選択画面からスタートします。作成中の場合は必ず先に「保存」してから他のタブへ移動してください。')
   );
 
   // ── ③ 受領書・納品書
   var s3=sec('ti-receipt','③ 受領書 ／ 納品書',
-    row('この画面でできること','保存済みの見積書をもとに、<b>受領書</b> または <b>納品書</b> を自動生成して印刷できます。新たに内容を入力する必要はありません。')
+    row('概要','保存済みの見積書をもとに <b>受領書</b> または <b>納品書</b> を自動生成して印刷できます。内容を改めて入力する必要はありません。')
     +row('使い方',
       '① 画面左の一覧から対象の見積書を選択します。<br>'
       +'② 右側にプレビューが表示されます。内容を確認してください。<br>'
-      +'③ 「PDF印刷」ボタンを押すと印刷ダイアログが開きます。')
-    +row('受領書','「下記の通り確かに受領致しました。」の挨拶文が自動で入ります。')
-    +row('納品書','「下記の通り納品致しましたので、ご査収のほどよろしくお願い申し上げます。」の挨拶文が自動で入ります。')
-    +note('⚠ 先に「新規作成」で見積書を作成・保存してからご利用ください。見積書が1件もない場合は書類を生成できません。')
+      +'③ '+btn('🖨 PDF印刷')+' を押すと印刷ダイアログが開きます。')
+    +row('受領書の文言','「下記の通り確かに受領致しました。」の挨拶文が自動で挿入されます。')
+    +row('納品書の文言','「下記の通り納品致しましたので、ご査収のほどよろしくお願い申し上げます。」の挨拶文が自動で挿入されます。')
+    +note('⚠ 先に「新規作成」で見積書を保存してからご利用ください。見積書が1件もない場合は書類を生成できません。')
   );
 
   // ── ④ 受領見積書
   var s4=sec('ti-inbox','④ 受領見積書',
-    row('この画面でできること','取引先から受け取ったPDFの見積書を登録・管理します。ファイルをシステム内で保管し、いつでも確認・ダウンロードできます。')
-    +row('PDFを登録する方法',
+    row('概要','取引先から受け取った見積書（PDF）を登録・管理します。システム内に保存し、いつでも確認・ダウンロードできます。')
+    +row('PDFを登録する',
       '① 右上の '+btn('＋ PDFを追加')+' を押します。<br>'
-      +'② 開いたウィンドウで、PDFをドラッグ＆ドロップするかクリックして選択します。<br>'
+      +'② 開いたウィンドウでPDFをドラッグ＆ドロップ、またはクリックして選択します。<br>'
       +'③ 取引先名（必須）・日付・金額・登録者・メモを入力して保存します。')
-    +row('絞り込み検索','<b>取引先名・日付・金額・種別（塩・内販・回漕）・メモ・登録者</b> で検索できます。')
-    +'<div style="border-bottom:1px solid #f0f4fa;padding:9px 0">'
-    +'<div style="font-weight:500;color:#1a3a6b;font-size:12px;margin-bottom:8px">各ボタンの役割</div>'
-    +'<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#444">'
-    +'<div>'+btn('✏ 修正')+'　取引先名・日付・金額・登録者・メモを編集できます。PDFを差し替えたい場合のみ再選択します。</div>'
-    +'<div>'+btn('👁 表示')+'　PDFを新しいタブでプレビュー表示します。</div>'
-    +'<div>'+btn('⬇ ダウンロード')+'　PDFを元のファイル名でダウンロードします。</div>'
-    +'<div>'+btn('🗑 削除')+'　確認後に削除します。元に戻せません。</div>'
-    +'</div>'
-    +'</div>'
-    +note('⚠ PDFデータもブラウザ内に保存されます。ファイルサイズが大きい場合（目安：数MB以上）は保存できないことがあります。その場合はメモのみ記録し、PDFは別途フォルダで管理してください。')
+    +row('絞り込み検索','<b>取引先名・日付・金額・種別・メモ・登録者</b> で検索できます。')
+    +row('各ボタンの役割',
+      '<div style="display:flex;flex-direction:column;gap:7px;margin-top:4px">'
+      +'<div>'+btn('✏ 修正')+'　取引先名・日付・金額・登録者・メモを編集します。PDFを差し替えたい場合のみ再選択します。</div>'
+      +'<div>'+btn('👁 表示')+'　PDFを新しいタブでプレビュー表示します。</div>'
+      +'<div>'+btn('⬇ ダウンロード')+'　PDFを元のファイル名でダウンロードします。</div>'
+      +'<div>'+btn('🗑 削除')+'　確認後に削除します。元に戻せません。</div>'
+      +'</div>')
+    +note('⚠ PDFデータはクラウド（Firestore）に保存されます。ファイルサイズが大きい場合（目安：数MB以上）は保存できないことがあります。その場合はメモのみ記録し、PDFは別途フォルダで管理してください。')
   );
 
-  // ── ⑤ データの管理
-  var s5=sec('ti-database','⑤ データの管理について',
-    row('保存場所','すべてのデータはお使いのブラウザの内部（localStorage）に保存されます。サーバーへの送信は行いません。インターネットが切れていても使用できます。')
-    +row('保存のタイミング','「保存」ボタンを押したときだけ保存されます。入力途中で他のタブに移動したり画面を閉じると、<b>保存していない内容は消えます。</b>こまめに保存してください。')
-    +row('別のPCへの引き継ぎ','現在、別のPC・ブラウザへデータを移す機能はありません。このシステムを開いているブラウザでのみデータが表示されます。')
-    +row('データが消えるケース',
-      '以下の操作を行うとデータが失われます。ご注意ください。<br>'
-      +'・ブラウザのキャッシュ・Cookieを「すべて削除」した場合<br>'
-      +'・シークレットモード（プライベートモード）でブラウザを閉じた場合<br>'
-      +'・ブラウザをアンインストールした場合')
-    +note('💡 大切な見積書は定期的に「PDF印刷」で紙またはPDFファイルとして保存しておくことをおすすめします。')
+  // ── ⑤ データ管理・ログイン
+  var s5=sec('ti-database','⑤ データ管理・ログインについて',
+    row('保存場所','データはクラウド（Firebase Firestore）に保存されます。ログイン中であれば <b>複数のPC・ブラウザから同じデータ</b> にアクセスできます。')
+    +row('ログイン','メールアドレスとパスワードでログインします。セッションは維持されるため、通常は毎回ログインする必要はありません。')
+    +row('保存のタイミング',btn('💾 保存')+' を押したときだけ保存されます。入力中に他のタブへ移動したり画面を閉じると <b>未保存の内容は消えます。</b> こまめに保存してください。')
+    +row('ユーザー管理（管理者のみ）','「設定」タブ → 「ユーザー管理」からアカウントの追加・削除・パスワード変更ができます。管理者権限を持つユーザーのみ操作できます。')
+    +ok('✅ データはクラウドに保存されるため、PCが変わってもデータは引き継がれます。ただし必要に応じてPDF印刷でバックアップを取ることをおすすめします。')
   );
 
-  return '<div style="max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:16px">'
+  // ── ⑥ よくある質問
+  var s6=sec('ti-message-circle-question','⑥ よくある質問（FAQ）',
+    row('見積書を間違えて削除した','削除したデータは復元できません。定期的にPDF印刷でバックアップをとってください。')
+    +row('PDFがうまく印刷できない','ブラウザの印刷設定で「用紙サイズ：A4」「余白：なし」「背景のグラフィック：オン」を確認してください。')
+    +row('見積番号を変更したい','見積番号は自動採番のため変更できません。内容のみ修正してください。')
+    +row('回漕の海上運賃を3つ入力したい','「海上輸送詳細」カードに海上運賃①②③の入力欄があります。航程名（例：2日航程）と金額を自由に入力できます。入力した分だけPDFに反映されます。')
+    +row('ログインできなくなった','管理者に連絡してパスワードのリセットを依頼してください。管理者が「設定」タブのユーザー管理から対応できます。')
+    +note('その他ご不明な点は社内システム担当までご連絡ください。')
+  );
+
+  return '<div style="max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:16px">'
     +'<div style="background:linear-gradient(135deg,#1a3a6b 0%,#2a5298 100%);border-radius:12px;padding:22px 28px;color:#fff">'
-    +'<div style="font-size:18px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:10px"><i class="ti ti-help-circle" style="font-size:22px"></i>操作手順・機能説明</div>'
-    +'<div style="font-size:13px;opacity:.85;line-height:1.7">共栄商事　見積管理システムの使い方をまとめています。はじめての方はまず「基本の流れ」をご確認ください。</div>'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px"><i class="ti ti-help-circle" style="font-size:22px"></i>操作手順・機能説明</div>'
+    +'<div style="font-size:13px;opacity:.85;line-height:1.8">共栄商事　見積管理システムの使い方をまとめています。はじめての方はまず「基本の流れ」をご確認ください。</div>'
     +'</div>'
     +intro
-    +s1+s2+s3+s4+s5
+    +s1+s2+s3+s4+s5+s6
     +'</div>';
 }
 
