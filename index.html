@@ -535,18 +535,22 @@ function doLogin(){
 let editUserIdx=null; // 編集中のユーザーインデックス（全ユーザー配列のindex）
 
 function _renderAdminHTML(allUsers){
-  const rows=allUsers.map((u,i)=>`
+  const rows=allUsers.map((u,i)=>{
+    const displayId = u.email||u.id||'―';
+    const displayName = u.name||'―';
+    return`
     <tr id="urow-${i}">
       <td style="padding:8px 10px;border-bottom:1px solid #e0e8f4;font-size:13px">
-        ${u.id}
+        ${displayId}
         ${u.isAdmin?'<span style="font-size:10px;background:#1a3a6b;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle">管理者</span>':''}
       </td>
-      <td style="padding:8px 10px;border-bottom:1px solid #e0e8f4;font-size:13px">${u.name||'―'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #e0e8f4;font-size:13px">${displayName}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #e0e8f4;text-align:center;white-space:nowrap">
         <button class="btn sm" onclick="openEditUser(${i})"><i class="ti ti-edit"></i>編集</button>
-        ${!u.isAdmin?`<button class="btn sm danger" onclick="delUser(${i})" style="margin-left:4px"><i class="ti ti-trash"></i>削除</button>`:''}
+        ${!u.isAdmin||allUsers.filter(x=>x.isAdmin).length>1?`<button class="btn sm danger" onclick="delUser(${i})" style="margin-left:4px"><i class="ti ti-trash"></i>削除</button>`:''}
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   return`<div style="max-width:720px;margin:0 auto">
     <div class="card">
@@ -569,13 +573,28 @@ function _renderAdminHTML(allUsers){
     <div class="card" id="editUserCard" style="margin-top:16px;display:none">
       <div class="card-head"><i class="ti ti-edit"></i>ユーザー編集</div>
       <div class="card-body">
-        <div class="form-grid" style="margin-bottom:12px">
-          <div class="form-group"><label>メールアドレス（ID）</label><input type="text" id="editUserId" placeholder="例：yamada@kyoeishoji.co.jp"></div>
-          <div class="form-group"><label>氏名</label><input type="text" id="editUserName" placeholder="例：山田 太郎"></div>
-        </div>
-        <div class="form-grid" style="margin-bottom:12px">
+        ${FB_READY
+          ?`<div style="font-size:11px;color:#5a6a82;margin-bottom:12px;padding:8px;background:#f0f4fc;border-radius:6px"><i class="ti ti-info-circle"></i> Firebase使用中はメールアドレスの変更はできません。氏名・権限のみ変更可能です。</div>
+          <div class="form-grid" style="margin-bottom:12px">
+            <div class="form-group"><label>メールアドレス（変更不可）</label><input type="text" id="editUserId" readonly style="background:#f0f4fc;color:#888;cursor:not-allowed"></div>
+            <div class="form-group"><label>氏名</label><input type="text" id="editUserName" placeholder="例：山田 太郎"></div>
+          </div>`
+          :`<div class="form-grid" style="margin-bottom:12px">
+            <div class="form-group"><label>メールアドレス（ID）</label><input type="text" id="editUserId" placeholder="例：yamada@kyoeishoji.co.jp"></div>
+            <div class="form-group"><label>氏名</label><input type="text" id="editUserName" placeholder="例：山田 太郎"></div>
+          </div>`
+        }
+        ${FB_READY?'':`<div class="form-grid" style="margin-bottom:12px">
           <div class="form-group"><label>新しいパスワード<span style="font-weight:400;color:#888">（変更する場合のみ）</span></label><input type="password" id="editUserPw" placeholder="空欄のままなら変更しない"></div>
           <div class="form-group"><label>新しいパスワード（確認）</label><input type="password" id="editUserPw2" placeholder=""></div>
+        </div>`}
+        ${FB_READY?'<div style="display:none"><input type="password" id="editUserPw"><input type="password" id="editUserPw2"></div>':''}
+        <div style="margin-bottom:12px;padding:10px 12px;background:#fff8e6;border:1px solid #ffe0a0;border-radius:8px;display:flex;align-items:center;gap:10px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:#1a3a6b;margin:0">
+            <input type="checkbox" id="editUserIsAdmin" style="width:16px;height:16px;cursor:pointer;accent-color:#1a3a6b">
+            管理者権限を付与する
+          </label>
+          <span style="font-size:11px;color:#7a5c00">※管理者はユーザー管理画面にアクセスできます</span>
         </div>
         <div id="editUserErr" style="color:#c0392b;font-size:12px;margin-bottom:8px;min-height:16px"></div>
         <div style="display:flex;gap:8px">
@@ -607,42 +626,75 @@ function _renderAdminHTML(allUsers){
 
 function openEditUser(i){
   editUserIdx=i;
-  const users=getUsers();
-  const u=users[i];
+  const u = FB_READY ? _adminUsers[i] : getUsers()[i];
+  if(!u) return;
   document.getElementById('editUserCard').style.display='';
-  document.getElementById('editUserId').value=u.id;
+  document.getElementById('editUserId').value=u.email||u.id||'';
   document.getElementById('editUserName').value=u.name||'';
   document.getElementById('editUserPw').value='';
   document.getElementById('editUserPw2').value='';
   document.getElementById('editUserErr').textContent='';
+  // 管理者チェックボックスの状態を設定
+  const adminCb=document.getElementById('editUserIsAdmin');
+  if(adminCb) adminCb.checked=!!u.isAdmin;
   document.getElementById('editUserCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function closeEditUser(){
   editUserIdx=null;
   document.getElementById('editUserCard').style.display='none';
 }
-function saveEditUser(){
-  const newId=document.getElementById('editUserId').value.trim();
+async function saveEditUser(){
   const newName=document.getElementById('editUserName').value.trim();
   const newPw=document.getElementById('editUserPw').value;
   const newPw2=document.getElementById('editUserPw2').value;
   const err=document.getElementById('editUserErr');
-  if(!newId){err.textContent='メールアドレスは必須です';return;}
+  const adminCb=document.getElementById('editUserIsAdmin');
+  const newIsAdmin=adminCb?adminCb.checked:false;
+  err.style.color='#c0392b';
   if(newPw&&newPw!==newPw2){err.textContent='パスワードが一致しません';return;}
-  const users=getUsers();
-  const target=users[editUserIdx];
-  // ID重複チェック（自分以外）
-  if(users.some((u,i)=>u.id===newId&&i!==editUserIdx)){err.textContent='このIDはすでに使用されています';return;}
-  // 更新（isAdminフラグは維持）
-  users[editUserIdx]={...target,id:newId,name:newName,...(newPw?{pw:newPw}:{})};
-  saveUsers(users);
-  // ログイン中のユーザーが自分自身を編集した場合、ヘッダーも更新
-  if(AUTH.currentUser&&AUTH.currentUser.id===target.id){
-    AUTH.currentUser={...AUTH.currentUser,id:newId,name:newName};
-    document.getElementById('userLabel').textContent=newName||newId;
+  if(newPw&&newPw.length<6){err.textContent='パスワードは6文字以上にしてください';return;}
+  const saveBtn=document.querySelector('#editUserCard .btn.primary');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='保存中…';}
+  try{
+    if(FB_READY){
+      const u=_adminUsers[editUserIdx];
+      if(!u){err.textContent='ユーザーが見つかりません';return;}
+      // Firestoreのメタ情報を更新
+      await db.collection('users').doc(u._docId).update({
+        name:newName,
+        isAdmin:newIsAdmin
+      });
+      err.style.color='#1b6b3a';
+      err.textContent='✓ 保存しました';
+      // ログイン中のユーザーが自分自身を編集した場合、ヘッダーも更新
+      if(AUTH.currentUser&&(AUTH.currentUser.uid===u._docId||AUTH.currentUser.id===(u.email||u.id))){
+        AUTH.currentUser={...AUTH.currentUser,name:newName};
+        AUTH.isAdmin=newIsAdmin;
+        document.getElementById('userLabel').textContent=newName||(u.email||u.id);
+      }
+      await refreshAdminUserList();
+      setTimeout(()=>closeEditUser(),800);
+    }else{
+      const newId=document.getElementById('editUserId').value.trim();
+      if(!newId){err.textContent='メールアドレスは必須です';return;}
+      const users=getUsers();
+      const target=users[editUserIdx];
+      if(users.some((u,i)=>u.id===newId&&i!==editUserIdx)){err.textContent='このIDはすでに使用されています';return;}
+      users[editUserIdx]={...target,id:newId,name:newName,isAdmin:newIsAdmin,...(newPw?{pw:newPw}:{})};
+      saveUsers(users);
+      if(AUTH.currentUser&&AUTH.currentUser.id===target.id){
+        AUTH.currentUser={...AUTH.currentUser,id:newId,name:newName};
+        AUTH.isAdmin=newIsAdmin;
+        document.getElementById('userLabel').textContent=newName||newId;
+      }
+      closeEditUser();
+      render();
+    }
+  }catch(e){
+    err.textContent='エラー: '+e.message;
+  }finally{
+    if(saveBtn){saveBtn.disabled=false;saveBtn.innerHTML='<i class="ti ti-device-floppy"></i>保存';}
   }
-  closeEditUser();
-  render();
 }
 
 async function addUser(){
@@ -708,13 +760,15 @@ async function addUser(){
 async function delUser(i){
   if(!confirm('このユーザーを削除しますか？'))return;
   if(FB_READY){
-    // Firestore のメタ情報を削除（Auth側はFirebase Consoleで削除）
-    const snap = await db.collection('users').get();
-    const docs = snap.docs;
-    if(docs[i]){
-      await docs[i].ref.delete();
-      alert('ユーザー情報を削除しました。\nFirebase ConsoleのAuthenticationからもアカウントを削除してください。');
+    const u=_adminUsers[i];
+    if(!u){alert('ユーザーが見つかりません');return;}
+    try{
+      // Firestoreのメタ情報を削除
+      await db.collection('users').doc(u._docId).delete();
+      alert('ユーザー情報を削除しました。\nFirebase ConsoleのAuthentication画面からもアカウントを削除してください。\n対象メールアドレス: '+(u.email||u.id||u._docId));
       await refreshAdminUserList();
+    }catch(e){
+      alert('削除エラー: '+e.message);
     }
   }else{
     const users=getUsers();
