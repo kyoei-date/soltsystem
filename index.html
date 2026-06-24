@@ -110,7 +110,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 .party-left{padding:14px 18px;border-right:1.5px solid #1a3a6b}
 .party-right{padding:14px 18px;background:#f0f4fc;display:flex;flex-direction:column;gap:0}
 .party-label{font-size:9px;color:#5a6a82;letter-spacing:.05em;margin-bottom:4px;font-weight:500;text-transform:uppercase}
-.customer-name{font-size:15pt;font-weight:500;border-bottom:1.5px solid #1a3a6b;padding-bottom:6px;margin-bottom:8px;word-break:break-all;white-space:pre-wrap;line-height:1.5}
+.customer-name{font-size:15pt;font-weight:500;border-bottom:1.5px solid #1a3a6b;padding-bottom:6px;margin-bottom:8px;word-break:break-word;white-space:pre-wrap;line-height:1.5;overflow-wrap:break-word}
 .greeting{font-size:10px;color:#444;line-height:1.9}
 .company-name{font-size:13pt;font-weight:500;color:#1a3a6b}
 .company-sub{font-size:9px;color:#555;line-height:2;margin-top:3px;margin-bottom:10px}
@@ -801,16 +801,7 @@ function renderAdmin(){
 // ── 設定画面（パスワード変更・Firebase情報） ────────────────
 function renderSettings(){
   const isAdmin=AUTH.isAdmin;
-  const fbStatus=FB_READY
-    ?`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#e8f5ee;border:1px solid #8dd4ab;border-radius:8px;font-size:12px;color:#1b6b3a;margin-bottom:16px">
-        <i class="ti ti-database-check" style="font-size:16px"></i>
-        <div><strong>Firebase接続中</strong> — データはFirestore（クラウド）に保存されています。<br>プロジェクト: <code>${FIREBASE_CONFIG.projectId}</code></div>
-      </div>`
-    :`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;font-size:12px;color:#7a5c00;margin-bottom:16px">
-        <i class="ti ti-database-off" style="font-size:16px"></i>
-        <div><strong>localStorage モード</strong> — このブラウザのみにデータが保存されています。<br>
-        <span style="color:#c0392b">Firebaseを設定するとクラウド保存・複数端末共有が可能になります。</span></div>
-      </div>`;
+  const fbStatus='';
   const migrateBtn=!FB_READY?'':`
     <div class="card" style="margin-top:16px">
       <div class="card-head"><i class="ti ti-database-import"></i>データ移行（localStorage → Firestore）</div>
@@ -1016,7 +1007,7 @@ function fiscalYearSelector(years,cur,onchange){
 function nowJST(){const s=new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});return s.replace(/\//g,'/').replace(',','');}
 function fmt(n){return n?Number(n).toLocaleString('ja-JP'):''}
 function calcSub(items){return items.reduce((s,it)=>s+(parseFloat(it.amount)||0),0)}
-function calcKaisouTotal(e){return(parseFloat(e.kaisouFare1)||0)+(parseFloat(e.kaisouFare2)||0);}
+function calcKaisouTotal(e){return(parseFloat(e.kaisouFare1)||0)+(parseFloat(e.kaisouFare2)||0)+(parseFloat(e.kaisouFare3)||0);}
 function typeLabel(t){return{shio:'塩（外販）',nai:'内販',kaisou:'回漕'}[t]||t}
 function typeBadge(t){const cls={shio:'b-shio',nai:'b-nai',kaisou:'b-kaisou'}[t]||'';const icon={shio:'ti-box',nai:'ti-building-warehouse',kaisou:'ti-ship'}[t]||'ti-file';return`<span class="badge ${cls}"><i class="ti ${icon}" style="font-size:10px"></i>${typeLabel(t)}</span>`}
 function genNo(t){
@@ -1090,7 +1081,7 @@ function spCloseMore(){
 // ─────────────────────────────────────────────────────────
 
 function newEst(type){
-  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'（船腹）',kaisouFare2:'',kaisouFareLabel2:'（船腹）',kaisouConditions:''};
+  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'2日航程',kaisouFare2:'',kaisouFareLabel2:'3日航程',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:''};
   S.selIdx=null;
   if(isMobile())spSw('new');else sw('new');
 }
@@ -1315,7 +1306,7 @@ function buildPrintDoc(e,docName,deliveryAddr){
   const partyLeft=`
     <div class="party-left">
       <div class="party-label">宛　先</div>
-      <div class="customer-name">${e.customer||'　'}　御中</div>
+      <div class="customer-name" style="${!(e.customer||'').includes('\n')?'white-space:nowrap;overflow:hidden;text-overflow:ellipsis':''}">${e.customer||'　'}　御中</div>
       ${deliveryAddrHtml}
       ${isEst?`<div style="font-size:10px;color:#666;margin-bottom:8px">${refText}</div>`:''}
       ${greeting}
@@ -1366,7 +1357,7 @@ function buildPrintDoc(e,docName,deliveryAddr){
     const rows=[
       {k:'１．品名',v:e.items.map(it=>it.name).filter(Boolean).join('、')},
       {k:'２．使用船舶',v:e.kaisouShip||''},
-      {k:'３．海上運賃',v:[e.kaisouFare1?'①2日航程　'+fmt(e.kaisouFare1)+'円　'+(e.kaisouFareLabel1||''):'',e.kaisouFare2?'②3日航程　'+fmt(e.kaisouFare2)+'円　'+(e.kaisouFareLabel2||''):''].filter(Boolean).join('<br>')},
+      {k:'３．海上運賃',v:[e.kaisouFare1?'①'+(e.kaisouFareLabel1||'')+'　'+fmt(e.kaisouFare1)+'円':'' ,e.kaisouFare2?'②'+(e.kaisouFareLabel2||'')+'　'+fmt(e.kaisouFare2)+'円':'',e.kaisouFare3?'③'+(e.kaisouFareLabel3||'')+'　'+fmt(e.kaisouFare3)+'円':''].filter(Boolean).join('<br>')},
       {k:'４．航路',v:e.kaisouRoute||''},
       {k:'５．適用開始時期',v:nl2br(e.delivery)},
       {k:'６．付帯条件',v:nl2br(e.kaisouConditions)},
@@ -1665,17 +1656,23 @@ function renderForm(){
     <div class="card-body"><div class="form-grid">
       <div class="form-group"><label>使用船舶</label><input type="text" value="${d.kaisouShip||''}" onchange="updField('kaisouShip',this.value)" placeholder="499型一般貨物船"></div>
       <div class="form-group"><label>航路</label><input type="text" value="${d.kaisouRoute||''}" onchange="updField('kaisouRoute',this.value)" placeholder="水島 / 黒崎"></div>
-      <div class="form-group"><label>海上運賃①（2日航程）金額（円）</label>
-        <div style="display:flex;gap:6px">
-          <input type="number" value="${d.kaisouFare1||''}" onchange="updField('kaisouFare1',this.value)" placeholder="2220000" style="flex:1;text-align:right;border-radius:6px">
-          <input type="text" value="${d.kaisouFareLabel1||'（船腹）'}" onchange="updField('kaisouFareLabel1',this.value)" placeholder="（船腹）" style="width:110px;border-radius:6px">
-        </div>
+      <div class="form-group"><label>海上運賃①　航程名</label>
+        <input type="text" value="${d.kaisouFareLabel1||'2日航程'}" onchange="updField('kaisouFareLabel1',this.value)" placeholder="例：2日航程">
       </div>
-      <div class="form-group"><label>海上運賃②（3日航程）金額（円）</label>
-        <div style="display:flex;gap:6px">
-          <input type="number" value="${d.kaisouFare2||''}" onchange="updField('kaisouFare2',this.value)" placeholder="3000000" style="flex:1;text-align:right;border-radius:6px">
-          <input type="text" value="${d.kaisouFareLabel2||'（船腹）'}" onchange="updField('kaisouFareLabel2',this.value)" placeholder="（船腹）" style="width:110px;border-radius:6px">
-        </div>
+      <div class="form-group"><label>海上運賃①　金額（円）</label>
+        <input type="number" value="${d.kaisouFare1||''}" onchange="updField('kaisouFare1',this.value)" placeholder="2220000" style="text-align:right">
+      </div>
+      <div class="form-group"><label>海上運賃②　航程名</label>
+        <input type="text" value="${d.kaisouFareLabel2||'3日航程'}" onchange="updField('kaisouFareLabel2',this.value)" placeholder="例：3日航程">
+      </div>
+      <div class="form-group"><label>海上運賃②　金額（円）</label>
+        <input type="number" value="${d.kaisouFare2||''}" onchange="updField('kaisouFare2',this.value)" placeholder="3000000" style="text-align:right">
+      </div>
+      <div class="form-group"><label>海上運賃③　航程名</label>
+        <input type="text" value="${d.kaisouFareLabel3||''}" onchange="updField('kaisouFareLabel3',this.value)" placeholder="例：4日航程">
+      </div>
+      <div class="form-group"><label>海上運賃③　金額（円）</label>
+        <input type="number" value="${d.kaisouFare3||''}" onchange="updField('kaisouFare3',this.value)" placeholder="" style="text-align:right">
       </div>
       <div class="form-group full"><label>付帯条件</label><textarea rows="4" onchange="updField('kaisouConditions',this.value)">${d.kaisouConditions||''}</textarea></div>
     </div></div></div>`;
