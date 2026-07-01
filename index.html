@@ -48,7 +48,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 .btn.sm{padding:4px 10px;font-size:11px}
 
 /* New type selector buttons */
-.type-select-area{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:8px}
+.type-select-area{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:8px}
 .type-btn-big{background:#fff;border:2px solid #c8d4e0;border-radius:12px;padding:22px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;transition:all .2s;font-family:inherit}
 .type-btn-big:hover{border-color:#1a3a6b;background:#f0f4fc;transform:translateY(-2px);box-shadow:0 4px 12px rgba(26,58,107,.12)}
 .type-btn-big .icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
@@ -60,6 +60,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 .type-btn-big.shio{border-color:#b5cce8}
 .type-btn-big.nai{border-color:#a0d4b5}
 .type-btn-big.kaisou{border-color:#e0b88a}
+.type-btn-big.free .icon{background:#f2e8fa;color:#5a2a8a}
+.type-btn-big.free{border-color:#cbb0e0}
 
 .item-table{width:100%;border-collapse:collapse;font-size:13px}
 .item-table thead tr{background:#1a3a6b}
@@ -82,6 +84,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 .b-shio{background:#dce8f8;color:#1a3a6b;border:1px solid #b5cce8}
 .b-nai{background:#d8f0e3;color:#1b6b3a;border:1px solid #8dd4ab}
 .b-kaisou{background:#fde8d0;color:#8a3a00;border:1px solid #e0aa70}
+.b-free{background:#f2e8fa;color:#5a2a8a;border:1px solid #cbb0e0}
 .empty{text-align:center;padding:48px 20px;color:#888}
 .empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.3}
 .pdf-preview{background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
@@ -1010,10 +1013,10 @@ function nowJST(){const s=new Date().toLocaleString('ja-JP',{timeZone:'Asia/Toky
 function fmt(n){return n?Number(n).toLocaleString('ja-JP'):''}
 function calcSub(items){return items.reduce((s,it)=>s+(parseFloat(it.amount)||0),0)}
 function calcKaisouTotal(e){return(parseFloat(e.kaisouFare1)||0)+(parseFloat(e.kaisouFare2)||0)+(parseFloat(e.kaisouFare3)||0);}
-function typeLabel(t){return{shio:'塩（外販）',nai:'内販',kaisou:'回漕'}[t]||t}
-function typeBadge(t){const cls={shio:'b-shio',nai:'b-nai',kaisou:'b-kaisou'}[t]||'';const icon={shio:'ti-box',nai:'ti-building-warehouse',kaisou:'ti-ship'}[t]||'ti-file';return`<span class="badge ${cls}"><i class="ti ${icon}" style="font-size:10px"></i>${typeLabel(t)}</span>`}
+function typeLabel(t){return{shio:'塩（外販）',nai:'内販',kaisou:'回漕',free:'フリー形式'}[t]||t}
+function typeBadge(t){const cls={shio:'b-shio',nai:'b-nai',kaisou:'b-kaisou',free:'b-free'}[t]||'';const icon={shio:'ti-box',nai:'ti-building-warehouse',kaisou:'ti-ship',free:'ti-pencil'}[t]||'ti-file';return`<span class="badge ${cls}"><i class="ti ${icon}" style="font-size:10px"></i>${typeLabel(t)}</span>`}
 function genNo(t){
-  const hundred={kaisou:5,nai:7,shio:9}[t]||0;
+  const hundred={kaisou:5,nai:7,shio:9,free:3}[t]||0;
   const now=new Date();
   const yy=String(now.getFullYear()).slice(-2),m=String(now.getMonth()+1).padStart(2,'0'),dd=String(now.getDate()).padStart(2,'0');
   const ymd=yy+m+dd;
@@ -1093,7 +1096,7 @@ function spCloseMore(){
 // ─────────────────────────────────────────────────────────
 
 function newEst(type){
-  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:''};
+  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:'',freeText:''};
   S.selIdx=null;
   if(isMobile())spSw('new');else sw('new');
 }
@@ -1282,6 +1285,7 @@ function buildPrintDoc(e,docName,deliveryAddr){
   const sub=calcSub(e.items),tax=Math.round(sub*.1),grand=sub+tax;
   const isEst=docName==='見積書';
   const isKaisou=e.type==='kaisou';
+  const isFree=e.type==='free';
   const title=isEst?'御　見　積　書':
     docName==='受領書'?'受　領　書':docName==='請求書'?'請　求　書':'納　品　書';
 
@@ -1326,7 +1330,7 @@ function buildPrintDoc(e,docName,deliveryAddr){
 
   // 条件欄
   const nl2br=s=>(s||'').replace(/\n/g,'<br>');
-  const condRows=isKaisou?[]:e.type==='nai'?([
+  const condRows=isKaisou||isFree?[]:e.type==='nai'?([
     {k:'納期',v:nl2br(e.deliveryDate)},{k:'受渡場所',v:nl2br(e.receivePlace)},
     {k:'発注ロット',v:nl2br(e.lot)},{k:'受渡条件',v:nl2br(e.receive)},
     {k:'御支払条件',v:nl2br(e.payment)},{k:'見積有効期間',v:nl2br(e.valid)},
@@ -1363,6 +1367,14 @@ function buildPrintDoc(e,docName,deliveryAddr){
         </div>
       </div>
     </div>`;
+
+  let freeSection='';
+  if(isFree&&isEst&&e.freeText){
+    freeSection=`<div class="kaisou-section">
+      <div class="kaisou-section-title">見　積　内　容</div>
+      <div style="padding:12px 14px;font-size:11.5px;line-height:1.9;color:#222;white-space:pre-wrap">${e.freeText}</div>
+    </div>`;
+  }
 
   let kaisouSection='';
   if(isKaisou&&isEst){
@@ -1401,8 +1413,9 @@ function buildPrintDoc(e,docName,deliveryAddr){
     </div>
     <div class="doc-party">${partyLeft}${partyRight}</div>
     ${condRows.length?`<div class="conditions-band">${condRows.map(c=>`<div class="cond-row"><span class="cond-key">${c.k}</span><span class="cond-val">${c.v}</span></div>`).join('')}</div>`:''}
-    ${!isKaisou||docName!=='見積書'?`<div class="items-section"><div class="items-title">品　目　明　細</div>${itemsBlock}</div>${totalBlock}`:''}
+    ${(!isKaisou&&!isFree)||docName!=='見積書'?`<div class="items-section"><div class="items-title">品　目　明　細</div>${itemsBlock}</div>${totalBlock}`:''}
     ${kaisouSection}
+    ${freeSection}
     ${e.remarks?`<div class="remarks-section">${e.remarks.replace(/\n/g,'<br>')}</div>`:''}
     ${barcodeBlock}
   </div>`;
@@ -1421,6 +1434,8 @@ function render(){
   // 備考欄の高さをコンテンツに合わせて自動調整（入力・閲覧両モード）
   var ta=document.getElementById('remarksTA');
   if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+  var fta=document.getElementById('freeTextTA');
+  if(fta){fta.style.height='auto';fta.style.height=Math.max(fta.scrollHeight,420)+'px';}
 }
 
 // ── スマホ用見積一覧 ──────────────────────────────────────
@@ -1630,6 +1645,11 @@ function renderNew(){
           <div class="label">回漕</div>
           <div class="desc">海上輸送の見積書</div>
         </button>
+        <button class="type-btn-big free" onclick="newEst('free')">
+          <div class="icon"><i class="ti ti-pencil"></i></div>
+          <div class="label">フリー形式</div>
+          <div class="desc">項目・金額を自由に記入</div>
+        </button>
       </div>
     </div>`;
   }
@@ -1729,6 +1749,14 @@ function renderForm(){
       </div>
     </div>
   </div>
+  ${d.type==='free'?`<div class="card" style="position:relative">${disabledOverlay}<div class="card-head"><i class="ti ti-pencil"></i>見積内容（自由記入）</div>
+    <div class="card-body">
+      <div class="form-group full">
+        <label>品目・数量・単価・条件・納期など、自由に記入してください</label>
+        <textarea id="freeTextTA" rows="18" style="min-height:420px;line-height:1.8;font-size:13px" oninput="updField('freeText',this.value);autoGrow(this)" onchange="updField('freeText',this.value)" placeholder="例：&#10;塩化ナトリウム　25kg袋　1,000袋　＠350円　350,000円&#10;&#10;納　期：ご発注後2週間&#10;受渡場所：貴社指定場所&#10;支払条件：月末締め翌月末払い&#10;見積有効期間：発行日より1ヶ月">${d.freeText||''}</textarea>
+      </div>
+    </div>
+  </div>`:`
   <div class="card" style="position:relative">${disabledOverlay}<div class="card-head"><i class="ti ti-clipboard-list"></i>条件</div>
     <div class="card-body"><div class="form-grid">
       ${d.type==='kaisou'?`
@@ -1756,8 +1784,8 @@ function renderForm(){
       `}
     </div></div>
   </div>
-  ${extraCard}
-  ${d.type!=='kaisou'?`<div class="card" style="position:relative">${disabledOverlay}<div class="card-head"><i class="ti ti-table"></i>品目明細</div>
+  ${extraCard}`}
+  ${d.type!=='kaisou'&&d.type!=='free'?`<div class="card" style="position:relative">${disabledOverlay}<div class="card-head"><i class="ti ti-table"></i>品目明細</div>
     <div class="card-body">
     <div class="item-table-wrap"><table class="item-table">
       <thead><tr><th>品名</th><th>規格</th><th>数量</th><th>単位</th><th>単価（円）</th><th>金額（円）</th><th></th></tr></thead>
