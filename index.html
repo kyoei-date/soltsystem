@@ -1474,12 +1474,10 @@ function buildPrintDoc(e,docName,deliveryAddr){
 
   // 右側：見積人ブロック（会社情報 + 承認・確認・作成）
   const partyRight=`
-    <div class="party-right">
+    <div class="party-right" style="position:relative">
+      <div style="position:absolute;top:6px;right:10px;font-size:10px;color:#555">日付：<span style="color:#222;font-weight:500">${e.date}</span></div>
       <div style="text-align:center">
-        <div style="display:flex;justify-content:center;align-items:flex-start;gap:10px">
-          <div class="party-label" style="font-size:8px;margin-bottom:0">見積人</div>
-          <div style="font-size:10px;color:#555">日付：<span style="color:#222;font-weight:500">${e.date}</span></div>
-        </div>
+        <div class="party-label" style="font-size:8px;margin-bottom:0">見積人</div>
         <div class="company-name">${CO.name}</div>
         <div class="company-sub">${CO.addr}<br>${CO.tel}</div>
       </div>
