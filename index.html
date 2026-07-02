@@ -117,9 +117,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 .doc-title-center{text-align:center;font-size:22pt;font-weight:500;letter-spacing:.25em;padding:14px 0 10px;border-bottom:3px double #1a3a6b;margin-bottom:14px;color:#1a3a6b}
 .doc-no-row{display:flex;justify-content:flex-end;gap:20px;font-size:11px;color:#555;margin-bottom:10px}
 .doc-no-row span{font-weight:500;color:#222}
-.doc-party{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid #1a3a6b;margin-bottom:0}
+.doc-party{display:grid;grid-template-columns:1.6fr 1fr;gap:0;border:1.5px solid #1a3a6b;margin-bottom:0}
 .party-left{padding:14px 18px;border-right:1.5px solid #1a3a6b}
-.party-right{padding:14px 18px;background:#f0f4fc;display:flex;flex-direction:column;gap:0}
+.party-right{padding:38px 18px 14px;background:#f0f4fc;display:flex;flex-direction:column;gap:0}
 .party-label{font-size:9px;color:#5a6a82;letter-spacing:.05em;margin-bottom:4px;font-weight:500;text-transform:uppercase}
 .customer-name{font-size:15pt;font-weight:500;border-bottom:1.5px solid #1a3a6b;padding-bottom:6px;margin-bottom:8px;word-break:break-word;white-space:pre-wrap;line-height:1.5;overflow-wrap:break-word}
 .greeting{font-size:10px;color:#444;line-height:1.9}
@@ -1273,7 +1273,7 @@ function spCloseMore(){
 // ─────────────────────────────────────────────────────────
 
 function newEst(type){
-  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:'',freeText:''};
+  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',taxRate:'10',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:'',freeText:''};
   S.selIdx=null;
   if(isMobile())spSw('new');else sw('new');
 }
@@ -1294,13 +1294,19 @@ function updItem(i,f,v){
   updTotals();
 }
 function updField(f,v){if(S.editData)S.editData[f]=v;}
+function taxRateOf(d){return parseFloat(d&&d.taxRate)||10;}
 function updTotals(){
   const d=S.editData;if(!d)return;
-  const sub=calcSub(d.items),tax=Math.round(sub*.1);
+  const sub=calcSub(d.items),tax=Math.round(sub*taxRateOf(d)/100);
   const e1=document.getElementById('tSub'),e2=document.getElementById('tTax'),e3=document.getElementById('tGrand');
   if(e1)e1.textContent=fmt(sub)+'円';
   if(e2)e2.textContent=fmt(tax)+'円';
   if(e3)e3.textContent=fmt(sub+tax)+'円';
+}
+function updTaxRate(v){
+  if(!S.editData)return;
+  S.editData.taxRate=v;
+  render();
 }
 async function saveEst(){
   if(!S.editData)return;
@@ -1459,19 +1465,19 @@ function genCode128SVG(text, opts){
 
 function buildPrintDoc(e,docName,deliveryAddr){
   deliveryAddr=deliveryAddr||'';
-  const sub=calcSub(e.items),tax=Math.round(sub*.1),grand=sub+tax;
+  const sub=calcSub(e.items),taxRate=taxRateOf(e),tax=Math.round(sub*taxRate/100),grand=sub+tax;
   const isEst=docName==='見積書';
   const isKaisou=e.type==='kaisou';
   const isFree=e.type==='free';
   const title=isEst?'御　見　積　書':
     docName==='受領書'?'受　領　書':docName==='請求書'?'請　求　書':'納　品　書';
 
-  // 右側：見積人ブロック（会社情報 + 承認・調査・作成）
+  // 右側：見積人ブロック（会社情報 + 承認・確認・作成）
   const partyRight=`
     <div class="party-right">
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div class="party-label">見積人</div>
+      <div style="text-align:center">
+        <div style="display:flex;justify-content:center;align-items:flex-start;gap:10px">
+          <div class="party-label" style="font-size:8px;margin-bottom:0">見積人</div>
           <div style="font-size:10px;color:#555">日付：<span style="color:#222;font-weight:500">${e.date}</span></div>
         </div>
         <div class="company-name">${CO.name}</div>
@@ -1479,7 +1485,7 @@ function buildPrintDoc(e,docName,deliveryAddr){
       </div>
       <div class="stamp-row">
         <div class="stamp-cell">承　認<div class="stamp-box">${e.approved||''}</div></div>
-        <div class="stamp-cell">調　査<div class="stamp-box">${e.checked||''}</div></div>
+        <div class="stamp-cell">確　認<div class="stamp-box">${e.checked||''}</div></div>
         <div class="stamp-cell">作　成<div class="stamp-box">${e.created||''}</div></div>
       </div>
     </div>`;
@@ -1539,7 +1545,7 @@ function buildPrintDoc(e,docName,deliveryAddr){
       <div class="total-inner">
         <div class="total-grid">
           <div class="tk">小計</div><div class="tv">¥ ${fmt(sub)}</div>
-          <div class="tk">消費税（10%）</div><div class="tv">¥ ${fmt(tax)}</div>
+          <div class="tk">消費税（${taxRate}%）</div><div class="tv">¥ ${fmt(tax)}</div>
           <div class="grand-k">合　計</div><div class="grand-v">¥ ${fmt(grand)}</div>
         </div>
       </div>
@@ -1835,7 +1841,7 @@ function renderNew(){
 
 function renderForm(){
   const d=S.editData;if(!d)return'';
-  const sub=calcSub(d.items),tax=Math.round(sub*.1);
+  const sub=calcSub(d.items),tax=Math.round(sub*taxRateOf(d)/100);
   const items=d.items.map((it,i)=>`<tr>
     <td><input type="text" value="${it.name}" oninput="updItem(${i},'name',this.value)" placeholder="品名"></td>
     <td><input type="text" value="${it.spec}" oninput="updItem(${i},'spec',this.value)" placeholder="規格"></td>
@@ -1920,7 +1926,7 @@ function renderForm(){
         <div style="font-size:11px;font-weight:600;color:#3a6abf;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:5px"><i class="ti ti-writing" style="font-size:13px"></i>担当者</div>
         <div class="form-grid-3">
           <div class="form-group"><label>承認</label><input type="text" value="${d.approved||''}" onchange="updField('approved',this.value)"></div>
-          <div class="form-group"><label>調査</label><input type="text" value="${d.checked||''}" onchange="updField('checked',this.value)"></div>
+          <div class="form-group"><label>確認</label><input type="text" value="${d.checked||''}" onchange="updField('checked',this.value)"></div>
           <div class="form-group"><label>作成</label><input type="text" value="${d.created||''}" onchange="updField('created',this.value)"></div>
         </div>
       </div>
@@ -1971,7 +1977,15 @@ function renderForm(){
     <button class="btn sm" style="margin-top:10px" onclick="addItem()"><i class="ti ti-plus"></i>行追加</button>
     <div class="total-wrap"><div class="total-box">
       <div class="total-row"><span>小計</span><span id="tSub">${fmt(sub)}円</span></div>
-      <div class="total-row"><span>消費税（10%）</span><span id="tTax">${fmt(tax)}円</span></div>
+      <div class="total-row" style="align-items:center">
+        <span style="display:flex;align-items:center;gap:6px">消費税
+          <select onchange="updTaxRate(this.value)" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font-family:inherit;cursor:pointer">
+            <option value="10" style="color:#1a2a44;background:#fff" ${taxRateOf(d)===10?'selected':''}>10%</option>
+            <option value="8" style="color:#1a2a44;background:#fff" ${taxRateOf(d)===8?'selected':''}>8%</option>
+          </select>
+        </span>
+        <span id="tTax">${fmt(tax)}円</span>
+      </div>
       <div class="total-row grand"><span>合計</span><span id="tGrand">${fmt(sub+tax)}円</span></div>
     </div></div>
     </div>
@@ -2378,7 +2392,7 @@ function renderHelp(){
     +'<div style="border-bottom:1px solid #f0f4fa;padding:9px 0">'
     +'<div style="font-weight:600;color:#1a3a6b;font-size:12px;margin-bottom:10px">入力カードの説明</div>'
     +'<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#444;line-height:1.8">'
-    +'<div><b>📋 基本情報</b>　作成日・宛先（会社名）・照会番号を入力します。宛先は改行して複数行も入力できます（改行なしの場合は1行で表示）。承認・調査・作成の担当者名も入力でき、「作成」欄はPDFと一覧の両方に反映されます。</div>'
+    +'<div><b>📋 基本情報</b>　作成日・宛先（会社名）・照会番号を入力します。宛先は改行して複数行も入力できます（改行なしの場合は1行で表示）。承認・確認・作成の担当者名も入力でき、「作成」欄はPDFと一覧の両方に反映されます。</div>'
     +'<div><b>📋 条件</b>　種別ごとの取引条件を入力します。各項目は複数行入力できます。「その他」欄は自由記述です。</div>'
     +'<div><b>📋 品目明細</b>（塩・内販のみ）　品名・規格・数量・単位・単価を入力すると金額が自動計算されます。'+btn('行追加')+' で複数行入力できます。</div>'
     +'<div><b>📋 海上輸送詳細</b>（回漕のみ）　使用船舶・航路・海上運賃①②③・付帯条件を入力します。各運賃には航程名（例：2日航程）と金額を自由に入力でき、入力済みの運賃のみPDFに出力されます。</div>'
