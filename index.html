@@ -414,6 +414,7 @@ const FIREBASE_CONFIG = {
 
 // Firebase 初期化
 let db=null, fbAuth=null, FB_READY=false;
+let _unsubEstimates=null, _unsubReceived=null; // リアルタイム同期用リスナー解除関数
 (function initFirebase(){
   try{
     if(FIREBASE_CONFIG.apiKey==='YOUR_API_KEY'){
@@ -533,6 +534,7 @@ function onLoginSuccess(){
 }
 
 function logout(){
+  stopRealtimeSync();
   AUTH={loggedIn:false,currentUser:null,isAdmin:false};
   if(FB_READY && fbAuth) fbAuth.signOut().catch(()=>{});
   S.estimates=[]; S.receivedEstimates=[]; S.adminSubTab='users';
@@ -1047,12 +1049,7 @@ function autoGrow(el){el.style.height="auto";el.style.height=el.scrollHeight+"px
 async function loadData(){
   if(FB_READY){
     try{
-      // 見積データ
-      const snap = await db.collection('estimates').orderBy('_updatedAt','desc').get();
-      S.estimates = snap.docs.map(d=>({...d.data(), _docId:d.id}));
-      // 受領見積データ
-      const snapR = await db.collection('receivedEstimates').orderBy('_updatedAt','desc').get();
-      S.receivedEstimates = snapR.docs.map(d=>({...d.data(), _docId:d.id}));
+      await Promise.all([startEstimatesSync(), startReceivedSync()]);
     }catch(e){
       console.error('[kyoei] Firestore読み込みエラー',e);
       alert('データの読み込みに失敗しました。\n'+e.message);
@@ -1060,6 +1057,59 @@ async function loadData(){
   }else{
     ld();
   }
+}
+
+// ── リアルタイム同期（他のユーザーの変更を即座に反映） ──────────
+// 見積データの購読を開始し、初回データ取得時にresolveするPromiseを返す
+function startEstimatesSync(){
+  return new Promise((resolve,reject)=>{
+    let first=true;
+    if(_unsubEstimates)_unsubEstimates();
+    _unsubEstimates = db.collection('estimates').orderBy('_updatedAt','desc').onSnapshot(snap=>{
+      S.estimates = snap.docs.map(d=>({...d.data(), _docId:d.id}));
+      if(first){ first=false; resolve(); }
+      else{ refreshAfterRemoteUpdate('estimates'); }
+    }, err=>{
+      console.error('[kyoei] 見積データ同期エラー',err);
+      if(first){ first=false; resolve(); } // 初回失敗時も画面は起動させる
+    });
+  });
+}
+// 受領見積書（PDF登録）データの購読を開始
+function startReceivedSync(){
+  return new Promise((resolve,reject)=>{
+    let first=true;
+    if(_unsubReceived)_unsubReceived();
+    _unsubReceived = db.collection('receivedEstimates').orderBy('_updatedAt','desc').onSnapshot(snap=>{
+      S.receivedEstimates = snap.docs.map(d=>({...d.data(), _docId:d.id}));
+      if(first){ first=false; resolve(); }
+      else{ refreshAfterRemoteUpdate('received'); }
+    }, err=>{
+      console.error('[kyoei] 受領見積書データ同期エラー',err);
+      if(first){ first=false; resolve(); }
+    });
+  });
+}
+function stopRealtimeSync(){
+  if(_unsubEstimates){_unsubEstimates();_unsubEstimates=null;}
+  if(_unsubReceived){_unsubReceived();_unsubReceived=null;}
+}
+// リモートでの更新をどう画面へ反映するか。
+// 入力中の内容を壊さないよう、一覧系の画面のみ安全に部分更新する。
+function refreshAfterRemoteUpdate(kind){
+  if(!AUTH.loggedIn)return;
+  try{
+    if(S.tab==='list' && kind==='estimates'){
+      renderListInPlace();
+    }else if(S.tab==='received' && kind==='received'){
+      renderReceivedInPlace();
+    }else if((S.tab==='receipt'||S.tab==='delivery') && kind==='estimates' && !document.activeElement?.id?.includes('deliveryAddrInput')){
+      // プレビュー中で入力欄にフォーカスしていなければ再描画してOK
+      render();
+    }
+    // 「新規作成」タブで編集中（isUnsaved）の場合や、入力欄にフォーカス中の場合は
+    // 画面を勝手に書き換えず、裏側のデータだけ最新化しておく（保存時に反映される）
+  }catch(e){ console.error('[kyoei] 画面更新エラー',e); }
 }
 
 // localStorage フォールバック読み込み
