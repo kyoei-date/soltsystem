@@ -1621,7 +1621,7 @@ function render(){
   else if(S.tab==='help')c.innerHTML=renderHelp();
   else if(S.tab==='admin')c.innerHTML=renderAdmin();
   else if(S.tab==='settings')c.innerHTML=renderSettings();
-  else c.innerHTML=renderDocTab(S.tab);
+  else c.innerHTML=mob?renderDocTabSP(S.tab):renderDocTab(S.tab);
   // 備考欄の高さをコンテンツに合わせて自動調整（入力・閲覧両モード）
   var ta=document.getElementById('remarksTA');
   if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
@@ -2042,6 +2042,44 @@ function renderDocTab(docType){
       </div>
       <div class="pdf-preview" id="docPreview">${previewHTML}</div>
     </div>
+  </div>`;
+}
+
+// ── スマホ用：受領書・納品書（プレビューなし・カード表示のみ） ──────────
+function renderDocTabSP(docType){
+  const names={receipt:'受領書',delivery:'納品書'};
+  const name=names[docType];
+  const icon=docType==='receipt'?'ti-receipt':'ti-truck-delivery';
+  if(!S.estimates.length)return`<div class="sp-page-header"><i class="ti ${icon}"></i>${name}</div><div class="empty"><i class="ti ti-file-off"></i>見積書を先に作成してください</div>`;
+  const idx=S.selIdx!==null?S.selIdx:0;
+  const e=S.estimates[idx];
+  const addr=e.deliveryAddr||'';
+  const cards=S.estimates.map((est,i)=>{
+    const sel=i===idx;
+    const dateStr=est.date?est.date.replace(/-/g,'/'):'';
+    return`<div class="sp-est-card" onclick="S.selIdx=${i};render()" style="${sel?'border-color:#1a3a6b;border-width:2px;background:#f0f4fc':''}">
+      <div class="sp-est-card-top">
+        <span class="sp-est-card-no">No. ${est.no}</span>
+        ${typeBadge(est.type)}
+      </div>
+      <div class="sp-est-card-customer">${(est.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
+      <div class="sp-est-card-meta">
+        <span><i class="ti ti-calendar" style="font-size:11px"></i> ${dateStr}</span>
+        ${sel?'<span style="color:#1a3a6b;font-weight:600"><i class="ti ti-check" style="font-size:11px"></i> 選択中</span>':''}
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="sp-page-header"><i class="ti ${icon}"></i>${name}</div>
+  <div style="padding:0 8px 80px">
+    <div class="card" style="padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:#5a6a82;margin-bottom:8px;letter-spacing:.03em">選択中の見積</div>
+      <div style="font-size:13px;font-weight:600;color:#1a2a44;margin-bottom:10px">No. ${e.no}　${(e.customer||'（未入力）').replace(/\n/g,' ')}</div>
+      <div style="font-size:11px;font-weight:500;color:#5a6a82;margin-bottom:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-map-pin" style="font-size:13px"></i>お届け先住所（任意）</div>
+      <textarea id="deliveryAddrInput" rows="2" placeholder="例：福岡県北九州市小倉北区○○町1-2-3" style="width:100%;padding:8px 10px;font-size:14px;border:1.5px solid #c8d4e0;border-radius:6px;font-family:inherit;resize:vertical;min-height:54px;color:#222" oninput="updDeliveryAddr(this.value)">${addr}</textarea>
+      <button class="btn primary" style="width:100%;justify-content:center;margin-top:12px;padding:13px;font-size:14px" onclick="printDoc('${docType}')"><i class="ti ti-printer"></i>PDF印刷</button>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#5a6a82;margin-bottom:8px;padding-left:2px">見積を選択</div>
+    ${cards}
   </div>`;
 }
 
