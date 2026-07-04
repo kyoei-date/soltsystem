@@ -107,16 +107,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 
 #addReceivedModal{display:none}
 @media print{
-  body{background:#fff!important;margin:0!important;padding:0!important}
+  html,body{height:297mm!important;width:210mm!important;overflow:hidden!important;background:#fff!important;margin:0!important;padding:0!important}
   .app,.content{padding:0!important}
-  .topbar,.nav-tabs,.no-print{display:none!important}
+  .topbar,.nav-tabs,.no-print,.sp-bottom-nav,.sp-more-menu,.sp-more-overlay{display:none!important}
   .print-doc{display:block!important;margin:0;padding:0}
-  .print-doc-inner{box-shadow:none!important;border:none!important}
+  .print-doc-inner{box-shadow:none!important;border:none!important;break-inside:avoid;page-break-inside:avoid}
   @page{size:A4 portrait;margin:0}
   #printArea{
-    position:fixed;top:0;left:0;
+    position:fixed!important;top:0!important;left:0!important;
     width:210mm;height:297mm;
-    overflow:hidden;
+    overflow:hidden!important;
     background:#fff;
   }
 }
@@ -1332,6 +1332,7 @@ function applyA4Scale(pa){
   if(!inner)return;
   // まずスケールをリセットして自然サイズを計測
   inner.style.transform='none';
+  inner.style.zoom='';
   inner.style.width='';
   inner.style.height='';
   // A4サイズ（px換算: 96dpi基準）
@@ -1344,11 +1345,38 @@ function applyA4Scale(pa){
   const contentW=inner.scrollWidth;
   const scaleH=a4h/contentH;
   const scaleW=a4w/contentW;
-  const scale=Math.min(scaleH,scaleW); // 縦横両方収まる最大スケール
-  inner.style.transform=`scale(${scale})`;
-  inner.style.transformOrigin='top left';
-  // スケール後の実サイズに合わせてコンテナを調整
-  inner.style.width=(a4w/scale)+'px';
+  let scale=Math.min(scaleH,scaleW); // 縦横両方収まる最大スケール
+
+  // transform:scale は見た目だけを縮小し、レイアウト上のサイズ（ページ分割の判定に
+  // 使われる値）は変わらない。PC向けブラウザの印刷処理はそれでも1枚に収まることが
+  // 多いが、スマホ（iOS/Android）の印刷処理は縮小前のレイアウトサイズで改ページを
+  // 判定してしまい、2枚以上に分かれる原因になる。
+  // zoom はレイアウト自体を再計算させるプロパティなので、対応ブラウザではこちらを
+  // 優先して使い、実際のレイアウトサイズをA4に収める。
+  const useZoom = (typeof CSS!=='undefined' && CSS.supports && CSS.supports('zoom','1'));
+
+  if(useZoom){
+    let width=a4w/scale;
+    inner.style.width=width+'px';
+    inner.style.zoom=String(scale);
+    // zoomをかけると幅変更で行の折り返しが変わり、実際の高さが想定と
+    // わずかにズレることがあるため、実測しながら最大3回まで補正する
+    for(let i=0;i<3;i++){
+      const rect=inner.getBoundingClientRect();
+      if(rect.height<=a4h+0.5 && rect.width<=a4w+0.5)break;
+      const corrH=a4h/rect.height, corrW=a4w/rect.width;
+      scale=scale*Math.min(corrH,corrW)*0.99;
+      width=a4w/scale;
+      inner.style.width=width+'px';
+      inner.style.zoom=String(scale);
+    }
+  }else{
+    inner.style.transform=`scale(${scale})`;
+    inner.style.transformOrigin='top left';
+    // スケール後の実サイズに合わせてコンテナを調整
+    inner.style.width=(a4w/scale)+'px';
+  }
+
   pa.style.width=a4w+'px';
   pa.style.height=a4h+'px';
   pa.style.overflow='hidden';
@@ -1359,7 +1387,7 @@ function applyA4Scale(pa){
 
 function resetPrintArea(pa){
   const inner=pa.querySelector('.print-doc-inner');
-  if(inner){inner.style.transform='';inner.style.width='';inner.style.height='';}
+  if(inner){inner.style.transform='';inner.style.zoom='';inner.style.width='';inner.style.height='';}
   pa.style.display='none';
   pa.style.width='';pa.style.height='';
   pa.style.overflow='';pa.style.position='';
