@@ -359,11 +359,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
   </div>
   <!-- PC用ナビタブ -->
   <div class="nav-tabs no-print" id="navTabs">
-    <div class="tab active" onclick="sw('list')"><i class="ti ti-list-details" style="margin-right:4px"></i>見積一覧</div>
     <div class="tab" onclick="if(confirmLeave()){S.editData=null;S.readOnly=false;S.selIdx=null;sw('new')}"><i class="ti ti-plus" style="margin-right:4px"></i>新規作成</div>
-    <div class="tab" onclick="sw('receipt')"><i class="ti ti-receipt" style="margin-right:4px"></i>受領書</div>
-    <div class="tab" onclick="sw('delivery')"><i class="ti ti-truck-delivery" style="margin-right:4px"></i>納品書</div>
+    <div class="tab active" onclick="sw('list')"><i class="ti ti-list-details" style="margin-right:4px"></i>見積一覧</div>
     <div class="tab" onclick="sw('received')"><i class="ti ti-inbox" style="margin-right:4px"></i>受領見積書</div>
+    <div class="tab" onclick="sw('delivery')"><i class="ti ti-truck-delivery" style="margin-right:4px"></i>納品書</div>
+    <div class="tab" onclick="sw('receipt')"><i class="ti ti-receipt" style="margin-right:4px"></i>受領書</div>
     <div class="tab" id="adminTabWrap" style="display:none" onclick="sw('admin')"><i class="ti ti-shield" style="margin-right:4px"></i>管理者</div>
     <div class="tab" onclick="sw('settings')"><i class="ti ti-settings" style="margin-right:4px"></i>設定</div>
     <div class="tab" onclick="sw('help')"><i class="ti ti-help-circle" style="margin-right:4px"></i>操作手順</div>
@@ -1225,7 +1225,7 @@ function sw(tab){
   if(tab!=='new' && !confirmLeave())return;
   S.tab=tab;
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['list','new','receipt','delivery','received','admin','settings','help'][i]===tab);
+    t.classList.toggle('active',['new','list','received','delivery','receipt','admin','settings','help'][i]===tab);
   });
   render();
 }
