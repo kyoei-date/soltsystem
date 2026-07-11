@@ -372,14 +372,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 
   <!-- スマホ用下部ナビゲーション -->
   <nav class="sp-bottom-nav no-print" id="spBottomNav" style="display:none">
-    <button class="sp-nav-item active" id="spNav-list" onclick="spSw('list')">
-      <i class="ti ti-list-details"></i><span>一覧</span>
-    </button>
     <button class="sp-nav-item" id="spNav-new" onclick="spSw('new')">
       <i class="ti ti-plus-circle"></i><span>新規</span>
     </button>
-    <button class="sp-nav-item" id="spNav-receipt" onclick="spSw('receipt')">
-      <i class="ti ti-receipt"></i><span>受領書</span>
+    <button class="sp-nav-item active" id="spNav-list" onclick="spSw('list')">
+      <i class="ti ti-list-details"></i><span>一覧</span>
+    </button>
+    <button class="sp-nav-item" id="spNav-received" onclick="spSw('received')">
+      <i class="ti ti-inbox"></i><span>受領見積</span>
     </button>
     <button class="sp-nav-item" id="spNav-delivery" onclick="spSw('delivery')">
       <i class="ti ti-truck-delivery"></i><span>納品書</span>
@@ -392,10 +392,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
   <!-- スマホ用「その他」メニュー -->
   <div class="sp-more-overlay" id="spMoreOverlay" onclick="spCloseMore()" style="display:none"></div>
   <div class="sp-more-menu" id="spMoreMenu" style="display:none">
-    <button class="sp-more-item" onclick="spSw('received');spCloseMore()"><i class="ti ti-inbox"></i>受領見積書</button>
-    <button class="sp-more-item" onclick="spSw('help');spCloseMore()"><i class="ti ti-help-circle"></i>操作手順</button>
+    <button class="sp-more-item" onclick="spSw('receipt');spCloseMore()"><i class="ti ti-receipt"></i>受領書</button>
     <button class="sp-more-item" id="spAdminMenuItem" style="display:none" onclick="spSw('admin');spCloseMore()"><i class="ti ti-shield"></i>管理者</button>
     <button class="sp-more-item" onclick="spSw('settings');spCloseMore()"><i class="ti ti-settings"></i>設定</button>
+    <button class="sp-more-item" onclick="spSw('help');spCloseMore()"><i class="ti ti-help-circle"></i>操作手順</button>
     <button class="sp-more-item" onclick="logout();spCloseMore()" style="color:#c0392b"><i class="ti ti-logout" style="color:#c0392b"></i>ログアウト</button>
   </div>
 </div>
@@ -1231,7 +1231,7 @@ function sw(tab){
 }
 
 // ── スマホ用ナビ ──────────────────────────────────────────
-const SP_NAV_TABS=['list','new','receipt','delivery'];
+const SP_NAV_TABS=['new','list','received','delivery'];
 function isMobile(){return window.innerWidth<=640;}
 function applyLayout(){
   const mob=isMobile();
