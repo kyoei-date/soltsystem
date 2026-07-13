@@ -350,7 +350,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 
 <div class="app" id="app" style="display:none">
   <div class="topbar no-print">
-    <div class="topbar-title"><i class="ti ti-building-store" style="font-size:18px;flex-shrink:0"></i><span class="topbar-title-text">共栄商事　見積管理システム</span></div>
+    <a href="javascript:void(0)" onclick="refreshApp()" class="topbar-title" style="text-decoration:none;color:#fff;cursor:pointer" title="クリックして更新"><i class="ti ti-building-store" style="font-size:18px;flex-shrink:0"></i><span class="topbar-title-text">共栄商事　見積管理システム</span></a>
     <div class="topbar-right">
       <span class="saved-badge" id="savedBadge"><i class="ti ti-check"></i><span class="lbl">自動保存しました</span></span>
       <span id="userLabel" class="topbar-user" title=""><i class="ti ti-user" style="font-size:13px;flex-shrink:0"></i><span class="lbl"></span></span>
@@ -359,8 +359,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
   </div>
   <!-- PC用ナビタブ -->
   <div class="nav-tabs no-print" id="navTabs">
-    <div class="tab" onclick="if(confirmLeave()){S.editData=null;S.readOnly=false;S.selIdx=null;sw('new')}"><i class="ti ti-plus" style="margin-right:4px"></i>新規作成</div>
-    <div class="tab active" onclick="sw('list')"><i class="ti ti-list-details" style="margin-right:4px"></i>見積一覧</div>
+    <div class="tab active" onclick="if(confirmLeave()){S.editData=null;S.readOnly=false;S.selIdx=null;sw('new')}"><i class="ti ti-plus" style="margin-right:4px"></i>新規作成</div>
+    <div class="tab" onclick="sw('list')"><i class="ti ti-list-details" style="margin-right:4px"></i>見積一覧</div>
     <div class="tab" onclick="sw('received')"><i class="ti ti-inbox" style="margin-right:4px"></i>受領見積書</div>
     <div class="tab" onclick="sw('delivery')"><i class="ti ti-truck-delivery" style="margin-right:4px"></i>納品書</div>
     <div class="tab" onclick="sw('receipt')"><i class="ti ti-receipt" style="margin-right:4px"></i>受領書</div>
@@ -372,10 +372,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 
   <!-- スマホ用下部ナビゲーション -->
   <nav class="sp-bottom-nav no-print" id="spBottomNav" style="display:none">
-    <button class="sp-nav-item" id="spNav-new" onclick="spSw('new')">
+    <button class="sp-nav-item active" id="spNav-new" onclick="spSw('new')">
       <i class="ti ti-plus-circle"></i><span>新規</span>
     </button>
-    <button class="sp-nav-item active" id="spNav-list" onclick="spSw('list')">
+    <button class="sp-nav-item" id="spNav-list" onclick="spSw('list')">
       <i class="ti ti-list-details"></i><span>一覧</span>
     </button>
     <button class="sp-nav-item" id="spNav-received" onclick="spSw('received')">
@@ -403,7 +403,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#1a3a6b;backgr
 
 <script>
 const CO={name:'共栄商事株式会社',addr:'福岡県北九州市小倉北区西港町111-2',tel:'TEL 093(581)5688　FAX 093(581)5013'};
-let S={tab:'list',estimates:[],editData:null,selIdx:null,readOnly:false,receivedEstimates:[],searchRQ:'',fiscalYear:0,receivedFiscalYear:0,adminSubTab:'users',searchLH:''};
+let S={tab:'new',estimates:[],editData:null,selIdx:null,readOnly:false,receivedEstimates:[],searchRQ:'',fiscalYear:0,receivedFiscalYear:0,adminSubTab:'users',searchLH:''};
 
 // ══════════════════════════════════════════════════════════════
 //  ★ FIREBASE 設定 ★
@@ -539,7 +539,7 @@ function onLoginSuccess(){
   if(spAdmin)spAdmin.style.display=AUTH.isAdmin?'':'none';
   loadData().then(()=>{
     applyLayout();
-    if(isMobile())spSw('list');else{sw('list');render();}
+    if(isMobile())spSw('new');else{sw('new');render();}
   });
 }
 
@@ -1220,6 +1220,10 @@ function isUnsaved(){
 function confirmLeave(){
   if(!isUnsaved())return true;
   return confirm('入力中の見積が保存されていません。\nこのまま移動すると入力内容が失われます。\n\n移動しますか？');
+}
+function refreshApp(){
+  if(!confirmLeave())return;
+  location.reload();
 }
 function sw(tab){
   if(tab!=='new' && !confirmLeave())return;
