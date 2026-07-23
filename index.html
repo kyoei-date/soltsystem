@@ -1202,6 +1202,21 @@ function calcSub(items){return items.reduce((s,it)=>s+(parseFloat(it.amount)||0)
 function calcKaisouTotal(e){return(parseFloat(e.kaisouFare1)||0)+(parseFloat(e.kaisouFare2)||0)+(parseFloat(e.kaisouFare3)||0);}
 function typeLabel(t){return{shio:'塩（外販）',nai:'内販',kaisou:'回漕',free:'フリー形式'}[t]||t}
 function typeBadge(t){const cls={shio:'b-shio',nai:'b-nai',kaisou:'b-kaisou',free:'b-free'}[t]||'';const icon={shio:'ti-box',nai:'ti-building-warehouse',kaisou:'ti-ship',free:'ti-pencil'}[t]||'ti-file';return`<span class="badge ${cls}"><i class="ti ${icon}" style="font-size:10px"></i>${typeLabel(t)}</span>`}
+// ── 見積ステータス ──────────────────────────────────────
+function statusOptions(){return['作成中','提出済み','受注','失注'];}
+function statusColor(s){return{'作成中':'#8a9ab5','提出済み':'#2a5298','受注':'#1a8754','失注':'#c0392b'}[s]||'#8a9ab5';}
+function statusOf(e){return statusOptions().includes(e.status)?e.status:'作成中';}
+function statusSelect(i,e){
+  const cur=statusOf(e);
+  const opts=statusOptions().map(s=>`<option value="${s}"${s===cur?' selected':''}>${s}</option>`).join('');
+  return`<select onclick="event.stopPropagation()" onchange="event.stopPropagation();updEstStatus(${i},this.value)" style="appearance:none;-webkit-appearance:none;background:${statusColor(cur)};color:#fff;border:none;border-radius:99px;padding:3px 22px 3px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22white%22><path d=%22M5.5 7.5l4.5 4.5 4.5-4.5%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>');background-repeat:no-repeat;background-position:right 6px center;background-size:12px">${opts}</select>`;
+}
+async function updEstStatus(i,val){
+  if(!S.estimates[i])return;
+  S.estimates[i].status=val;
+  await sv();
+  if(S.tab==='list'){ if(isMobile())render(); else renderListInPlace(); }
+}
 function genNo(t){
   const hundred={kaisou:5,nai:7,shio:9,free:3}[t]||0;
   const now=new Date();
@@ -1287,14 +1302,14 @@ function spCloseMore(){
 // ─────────────────────────────────────────────────────────
 
 function newEst(type){
-  S.editData={type,no:genNo(type),date:today(),customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',taxRate:'10',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:'',freeText:''};
+  S.editData={type,no:genNo(type),date:today(),status:'作成中',customer:'',customer2:'',ref:'',delivery:'',lot:'',receive:'',deliveryDate:'',receivePlace:'',payment:'従来通り',valid:'次回価格改定まで',note:'',items:[{name:'',spec:'',qty:'',unit:'',price:'',amount:''}],remarks:'※上記お見積りに消費税は含まれておりません。',approved:'',checked:'',created:'',taxRate:'10',kaisouShip:'',kaisouRoute:'',kaisouFare1:'',kaisouFareLabel1:'',kaisouFare2:'',kaisouFareLabel2:'',kaisouFare3:'',kaisouFareLabel3:'',kaisouConditions:'',freeText:''};
   S.selIdx=null;
   if(isMobile())spSw('new');else sw('new');
 }
 function viewEst(i){S.editData=JSON.parse(JSON.stringify(S.estimates[i]));S.selIdx=i;S.readOnly=true;sw('new');}
 function editEst(i){S.editData=JSON.parse(JSON.stringify(S.estimates[i]));S.selIdx=i;S.readOnly=false;sw('new');}
 async function delEst(i){if(!confirm('削除しますか？'))return;S.estimates.splice(i,1);await sv();render();}
-function copyEst(i){const src=S.estimates[i];const copy=JSON.parse(JSON.stringify(src));copy.no=genNo(src.type);copy.date=today();S.editData=copy;S.selIdx=null;S.readOnly=false;sw('new');}
+function copyEst(i){const src=S.estimates[i];const copy=JSON.parse(JSON.stringify(src));copy.no=genNo(src.type);copy.date=today();copy.status='作成中';S.editData=copy;S.selIdx=null;S.readOnly=false;sw('new');}
 function addItem(){if(!S.editData)return;S.editData.items.push({name:'',spec:'',qty:'',unit:'',price:'',amount:''});render();}
 function removeItem(i){S.editData.items.splice(i,1);render();}
 function updItem(i,f,v){
@@ -1690,7 +1705,7 @@ function renderListSP(){
     return`<div class="sp-est-card" onclick="viewEst(${i})">
       <div class="sp-est-card-top">
         <span class="sp-est-card-no">No. ${e.no||'―'}</span>
-        ${typeBadge(e.type)}
+        <div style="display:flex;align-items:center;gap:6px">${typeBadge(e.type)}${statusSelect(i,e)}</div>
       </div>
       <div class="sp-est-card-customer">${(e.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
       <div class="sp-est-card-meta">
@@ -1762,7 +1777,7 @@ function renderList(){
         <div style="font-size:11px;color:#8a9ab5;font-weight:500;font-family:monospace">No. ${e.no}</div>
         <div style="font-size:14px;font-weight:600;color:#1a2a44">${(e.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
-          ${typeBadge(e.type)}
+          ${typeBadge(e.type)}${statusSelect(i,e)}
           <span style="font-size:11px;color:#5a6a82;background:#f0f4fa;padding:2px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-calendar" style="font-size:10px"></i>${dateStr}</span>
           ${e.created?`<span style="font-size:11px;background:#e8eef7;color:#1a3a6b;padding:2px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-user" style="font-size:10px"></i>${e.created}</span>`:''}
         </div>
@@ -1824,7 +1839,7 @@ function renderListInPlace(){
         <div style="font-size:11px;color:#8a9ab5;font-weight:500;font-family:monospace">No. ${e.no}</div>
         <div style="font-size:14px;font-weight:600;color:#1a2a44">${(e.customer||'（宛先未入力）').replace(/\n/g,' ')}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
-          ${typeBadge(e.type)}
+          ${typeBadge(e.type)}${statusSelect(i,e)}
           <span style="font-size:11px;color:#5a6a82;background:#f0f4fa;padding:2px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-calendar" style="font-size:10px"></i>${dateStr}</span>
           ${e.created?`<span style="font-size:11px;background:#e8eef7;color:#1a3a6b;padding:2px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-user" style="font-size:10px"></i>${e.created}</span>`:''}
         </div>
